@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
+using MongoDB.Bson;
+using MongoDB.Driver;
+
+
+
+
 
 namespace MongoCore
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading.Tasks;
-
-    using MongoDB.Bson;
-    using MongoDB.Driver;
-
-    using NLog;
-
     class Program
     {
         /// <summary>
@@ -21,7 +22,7 @@ namespace MongoCore
         /// <summary>
         /// The logger.
         /// </summary>
-        private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+        
 
         /// <summary>
         /// Gets the mongo collection name.
@@ -39,7 +40,7 @@ namespace MongoCore
         /// </returns>
         public static async Task Main(string[] args)
         {
-            Logger.Info("Start");
+            Console.WriteLine("Start");
 
             try
             {
@@ -57,7 +58,7 @@ namespace MongoCore
                 foreach (string fileName in FileNames)
                 {
                     string fileContent = await ReadFromFile(fileName);
-                    Logger.Debug($"Из файла {fileName} прочитано {fileContent.Length} знаков");
+                    Console.WriteLine($"Из файла {fileName} прочитано {fileContent.Length} знаков");
 
                     if (!string.IsNullOrWhiteSpace(fileContent))
                     {
@@ -65,19 +66,19 @@ namespace MongoCore
                         BsonDocument fileDocument =
                             new BsonDocument(new Dictionary<string, object> { { keyName, fileContent } });
                         await databaseFiles.InsertOneAsync(fileDocument);
-                        Logger.Debug($"Файл {keyName} успешно добавлен");
+                        Console.WriteLine($"Файл {keyName} успешно добавлен");
                     }
                 }
 
                 var allDocumentsInCollection = await databaseFiles.FindAsync(new BsonDocument());
-                await allDocumentsInCollection.ForEachAsync(document => { Logger.Info(document.ToString()); });
+                await allDocumentsInCollection.ForEachAsync(document => { Console.WriteLine(document.ToString()); });
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Console.WriteLine(e);
             }
 
-            Logger.Info("Finish 2");
+            Console.WriteLine("Finish 2");
         }
 
         /// <summary>
@@ -98,15 +99,19 @@ namespace MongoCore
                 {
                     // Read the stream to a string, and write the string to the console.
                     string line = await sr.ReadToEndAsync();
-                    Logger.Trace(line);
+                    Console.WriteLine(line);
                     return line;
                 }
             }
             catch (IOException e)
             {
-                Logger.Error(e);
+                Console.WriteLine(e);
                 return string.Empty;
-            }
+
+
+
+
         }
+    }
     }
 }
